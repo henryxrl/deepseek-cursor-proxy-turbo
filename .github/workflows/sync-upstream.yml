@@ -1,0 +1,48 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # Daily at UTC 00:00
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          # Use PAT to push so downstream workflows (docker-build) are triggered
+          token: ${{ secrets.FORK_SYNC_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/abcduyt1243-git/deepseek-cursor-proxy-turbo.git
+
+      - name: Fetch upstream
+        run: git fetch upstream main
+
+      - name: Check for new commits
+        id: check
+        run: |
+          UPSTREAM=$(git rev-parse upstream/main)
+          HEAD=$(git rev-parse HEAD)
+          if [ "$UPSTREAM" = "$HEAD" ]; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+            echo "Already up to date with upstream."
+          else
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+            echo "Upstream has new commits, merging..."
+          fi
+
+      - name: Merge upstream
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git merge upstream/main -m "Merge upstream/main"
+          git push origin main

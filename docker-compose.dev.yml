@@ -1,0 +1,15 @@
+services:
+  deepseek-cursor-proxy-turbo:
+    build: .
+    image: deepseek-cursor-proxy-turbo:latest
+    container_name: deepseek-cursor-proxy-turbo
+    ports:
+      - "${PROXY_PORT:-9000}:${PROXY_PORT:-9000}"
+    env_file:
+      - .env
+    volumes:
+      - proxy-data:/data
+    restart: unless-stopped
+
+volumes:
+  proxy-data:
