@@ -44,5 +44,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git merge upstream/main -m "Merge upstream/main"
+          git merge upstream/main --allow-unrelated-histories -m "Merge upstream/main"
           git push origin main
