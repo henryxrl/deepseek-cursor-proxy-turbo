@@ -44,5 +44,29 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git merge upstream/main --allow-unrelated-histories -m "Merge upstream/main"
+
+          # Save upstream's .gitignore before merge so we can
+          # reconcile it afterward (both sides added it independently)
+          if git cat-file -e upstream/main:.gitignore 2>/dev/null; then
+            git show upstream/main:.gitignore > /tmp/upstream-gitignore
+          else
+            touch /tmp/upstream-gitignore
+          fi
+
+          # Prefer our version for any conflicts
+          git merge upstream/main --allow-unrelated-histories -X ours \
+            -m "Merge upstream/main" || {
+              echo "Merge failed, check for non-.gitignore conflicts"
+              exit 1
+            }
+
+          # Append upstream's unique gitignore lines
+          if [ -s /tmp/upstream-gitignore ]; then
+            echo "" >> .gitignore
+            echo "# === Merged from upstream ===" >> .gitignore
+            grep -vxFf .gitignore /tmp/upstream-gitignore >> .gitignore || true
+            git add .gitignore
+            git commit --amend --no-edit
+          fi
+
           git push origin main
