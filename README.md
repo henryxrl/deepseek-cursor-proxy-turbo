@@ -5,6 +5,27 @@
 
 ---
 
+## ⚠️ Project moved / 项目已迁移
+
+This repository is now in maintenance mode. Active development has moved to:
+
+**[henryxrl/deepseek-cursor-gateway](https://github.com/henryxrl/deepseek-cursor-gateway)**
+
+For new deployments, please use `deepseek-cursor-gateway`. It includes:
+
+- Docker-first release images on GHCR with versioned tags
+- A clearer `GATEWAY_*` configuration namespace
+- Image handling modes: strip, reject, and OCR
+- OCR backends for OpenAI-compatible vision APIs, Gemini, and local Tesseract
+- Improved retry, rate-limit, and traffic-control behavior
+- A cleaner private Forgejo development to public GitHub release flow
+
+本仓库会保留作为 `deepseek-cursor-proxy` fork 线的历史入口。新部署和后续功能开发请使用：
+
+**[henryxrl/deepseek-cursor-gateway](https://github.com/henryxrl/deepseek-cursor-gateway)**
+
+---
+
 ## 🀄 中文版
 
 ### 一、为什么 Cursor 不能直接用 DeepSeek 的思考模式？
