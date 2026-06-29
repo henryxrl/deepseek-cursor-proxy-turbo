@@ -118,9 +118,7 @@ def compute_conversation_scopes(
     hasher = hashlib.sha256()
 
     if namespace:
-        ns_json = json.dumps(
-            namespace, ensure_ascii=False, separators=(",", ":")
-        )
+        ns_json = json.dumps(namespace, ensure_ascii=False, separators=(",", ":"))
         # sort_keys=True → {"messages":[...],"namespace":"ns"}
         prefix = b'{"messages":['
         suffix = b'],"namespace":' + ns_json.encode("utf-8") + b"}"
@@ -184,10 +182,7 @@ def compute_turn_signatures(
         if msg.get("role") == "user":
             # New turn: find the start of the consecutive-user group
             turn_start = i
-            while (
-                turn_start > 0
-                and messages[turn_start - 1].get("role") == "user"
-            ):
+            while turn_start > 0 and messages[turn_start - 1].get("role") == "user":
                 turn_start -= 1
             # Rebuild the hash from turn_start through i (one-time cost
             # per turn, which is rare compared to the total message count).
@@ -429,7 +424,9 @@ class ReasoningStore:
         if not isinstance(reasoning, str):
             return 0
         keys = portable_reasoning_keys(
-            message, cache_namespace, prior_messages,
+            message,
+            cache_namespace,
+            prior_messages,
             turn_signatures=turn_signatures,
         )
         unique_keys = list(dict.fromkeys(keys))
@@ -488,9 +485,7 @@ class ReasoningStore:
                 deleted += cursor.rowcount if cursor.rowcount != -1 else 0
 
         if self.max_rows is not None and self.max_rows > 0:
-            row = self._conn.execute(
-                "SELECT COUNT(*) FROM reasoning_cache"
-            ).fetchone()
+            row = self._conn.execute("SELECT COUNT(*) FROM reasoning_cache").fetchone()
             count = int(row[0] if row else 0)
             if count > self.max_rows:
                 cursor = self._conn.execute(

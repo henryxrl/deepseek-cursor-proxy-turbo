@@ -299,6 +299,7 @@ def normalize_message(
                     else []
                 )
                 hit_kind = None
+                _store_backfill_ms = 0.0
                 if needs_reasoning and store is not None:
                     _sg0 = time.perf_counter()
                     for lookup_key in lookup_keys:
@@ -532,8 +533,7 @@ def normalize_messages(
         if diagnostic is not None:
             diagnostics.append(diagnostic)
     _total_ms = sum(
-        (d.get("store_get_ms", 0) + d.get("store_backfill_ms", 0))
-        for d in diagnostics
+        (d.get("store_get_ms", 0) + d.get("store_backfill_ms", 0)) for d in diagnostics
     )
     LOG.info(
         "├ diag    msgs=%d store_get=%.0fms store_backfill=%.0fms "
@@ -957,12 +957,14 @@ def prepare_upstream_request(
     if config.user_message_suffix:
         suffix = "（" + config.user_message_suffix + "）"
         prepared["messages"] = [
-            {
-                **msg,
-                "content": (msg.get("content") or "") + suffix,
-            }
-            if msg.get("role") == "user"
-            else msg
+            (
+                {
+                    **msg,
+                    "content": (msg.get("content") or "") + suffix,
+                }
+                if msg.get("role") == "user"
+                else msg
+            )
             for msg in prepared["messages"]
         ]
 
